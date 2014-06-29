@@ -2,10 +2,7 @@ package test;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.XmlConfigBuilder;
-import com.hazelcast.core.Client;
-import com.hazelcast.core.ClientListener;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.*;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -28,6 +25,8 @@ public class Node {
 
     private final HazelcastInstance hazelcast;
 
+    private IMap<String, String> map;
+    private boolean valueSet;
     private String clientListenerKey;
 
     public Node()
@@ -44,6 +43,7 @@ public class Node {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
+                changeValue();
                 dump();
             }
         }, 2, 2, TimeUnit.SECONDS);
@@ -61,6 +61,17 @@ public class Node {
                 logger.info("Client disconnected: "+client.getSocketAddress());
             }
         });
+        map = hazelcast.getMap("TestMap");
+    }
+
+    private void changeValue() {
+        if(valueSet) {
+            map.remove(hazelcast.getCluster().getLocalMember().getUuid());
+        }
+        else {
+            map.set(hazelcast.getCluster().getLocalMember().getUuid(), hazelcast.getCluster().getLocalMember().getSocketAddress().getHostName());
+        }
+        valueSet = !valueSet;
     }
 
     public void stop()

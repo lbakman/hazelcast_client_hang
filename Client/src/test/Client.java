@@ -14,6 +14,7 @@ public class Client {
 
     private final HazelcastInstance hazelcast;
     private String lifecycleListenerId;
+    private IMap<String, String> map;
 
     public Client()
     {
@@ -27,6 +28,38 @@ public class Client {
     {
         //membershipListenerId = hazelcast.getCluster().addMembershipListener(membershipListener);
         lifecycleListenerId = hazelcast.getLifecycleService().addLifecycleListener(lifecycleListener);
+        map = hazelcast.getMap("TestMap");
+        map.addEntryListener(new EntryListener<String, String>() {
+            @Override
+            public void entryAdded(EntryEvent<String, String> event) {
+                logger.info("Entry added: "+event.getValue());
+            }
+
+            @Override
+            public void entryRemoved(EntryEvent<String, String> event) {
+                logger.info("Entry removed: "+event.getValue());
+            }
+
+            @Override
+            public void entryUpdated(EntryEvent<String, String> event) {
+                logger.info("Entry updated: "+event.getValue());
+            }
+
+            @Override
+            public void entryEvicted(EntryEvent<String, String> event) {
+                logger.info("Entry evicted: "+event.getValue());
+            }
+
+            @Override
+            public void mapEvicted(MapEvent event) {
+                logger.info("Map evicted: "+event.getName());
+            }
+
+            @Override
+            public void mapCleared(MapEvent event) {
+                logger.info("Map cleared: "+event.getName());
+            }
+        }, true);
     }
 /*
     private final MembershipListener membershipListener = new MembershipListener() {
@@ -80,6 +113,7 @@ public class Client {
 
     public static void main(String[] args) {
         PropertyConfigurator.configure("log4j.properties");
+        System.setProperty("hazelcast.logging.type", "log4j");
 
         Client client = new Client();
         client.start();

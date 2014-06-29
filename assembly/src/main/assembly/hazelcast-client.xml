@@ -24,7 +24,7 @@
     </group>
     <network>
         <cluster-members>
-            <address>127.0.0.1:5701</address>
+            <address>ip:5701</address>
         </cluster-members>
         <smart-routing>true</smart-routing>
         <redo-operation>true</redo-operation>
@@ -33,4 +33,9 @@
         <connection-attempt-period>3000</connection-attempt-period>
         <connection-attempt-limit>2147483647</connection-attempt-limit>
     </network>
+
+    <properties>
+        <property name="hazelcast.logging.type">log4j</property>
+    </properties>		
+    
 </hazelcast-client>
